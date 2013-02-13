@@ -26,7 +26,7 @@ class Altimeter extends Actor with ActorLogging{
   def receive = {
     case RateChange(amount) => //bound by [-1,]
       rateOfClimb = amount.min(1.0f).max(-1.0f) * maxRateOfClimb
-      println(s"Altimeter changed rate of climb to $rateOfClimb")
+      log.info(s"Altimeter changed rate of climb to $rateOfClimb")
     case Tick =>
       val tick = System.currentTimeMillis()
       altitude = altitude + rateOfClimb * ((tick - lastTick) / 60000.0)
