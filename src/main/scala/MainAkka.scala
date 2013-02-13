@@ -1,3 +1,7 @@
+/*
+Code from book that doesn't seem copmatible with current scala
+
+
 package  zzz.akka.investigation
 import  java.util.concurrent.Executors
 import  scala.concurrent.{Await,  Future,  ExecutionContext}
@@ -12,3 +16,5 @@ object  MainAkka {
     pool.shutdown()
   }
 }
+
+*/
