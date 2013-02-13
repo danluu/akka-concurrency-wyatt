@@ -6,6 +6,7 @@ class BadSActor extends Actor{
   def receive = {
     case "Good Morning"    => println ("Him: Forsooth 'tis the 'morn")
     case "You're terrible" => println ("Him: Yup")
+    case _                 => throw new Exception("BadSActor received unknown message")
   }
 }
 
