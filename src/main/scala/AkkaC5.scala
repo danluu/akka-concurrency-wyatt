@@ -9,7 +9,7 @@ class BadSActor extends Actor{
   }
 }
 
-class BadSMain {
+object BadSMain{
   val system = ActorSystem("BadS")
   val actor = system.actorOf(Props[BadSActor])
 
