@@ -3,7 +3,7 @@ package akka.tutorial
 import akka.actor.{Actor, Props, ActorSystem}
 
 class BadSActor extends Actor{
-  def recieve = {
+  def receive = {
     case "Good Morning"    => println ("Him: Forsooth 'tis the 'morn")
     case "You're terrible" => println ("Him: Yup")
   }
