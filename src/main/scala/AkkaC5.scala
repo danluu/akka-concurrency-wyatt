@@ -1,0 +1,29 @@
+package akka.tutorial
+
+import akka.actor.{Actor, Props, ActorSystem}
+
+class BadSActor extends Actor{
+  def recieve = {
+    case "Good Morning"    => println ("Him: Forsooth 'tis the 'morn")
+    case "You're terrible" => println ("Him: Yup")
+  }
+}
+
+class BadSMain {
+  val system = ActorSystem("BadS")
+  val actor = system.actorOf(Props[BadSActor])
+
+  def send(msg: String){
+    println("Me:   " + msg)
+    actor ! msg
+    Thread.sleep(100)
+  }
+
+
+  def main(args: Array[String]){
+    send("Good Morning")
+    send("You're terrible")
+    send("Hrmmm")
+    system.shutdown()
+  }
+}
