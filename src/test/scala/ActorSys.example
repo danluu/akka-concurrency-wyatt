@@ -1,0 +1,44 @@
+package zzz.akka.avionics
+
+import akka.actor.{Props,  Actor,  ActorSystem}
+import akka.testkit.{TestKit,  TestActorRef,  ImplicitSender}
+import org.scalatest.{WordSpec,  BeforeAndAfterAll, ParallelTestExecution}
+import java.util.concurrent.atomic.AtomicInteger
+import org.scalatest.matchers.MustMatchers
+
+object ActorSys{ 
+  val uniqueId = new AtomicInteger(0)
+}
+
+class ActorSys(name: String) extends TestKit(ActorSystem(name)) with ImplicitSender with DelayedInit { 
+  def this() = this(
+  "TestSystem%05d".format(ActorSys.uniqueId.getAndIncrement()))
+  def shutdown(): Unit = system.shutdown()
+  def delayedInit(f: => Unit): Unit = { 
+    try{ 
+    f
+    } finally { 
+      shutdown()
+    }
+
+  }
+}
+
+class MyActorSpec extends WordSpec with MustMatchers with ParallelTestExecution { 
+  def makeActor(): ActorRef = system.ActorOf(Props[MyActor],"MyActor")
+  "My Actor" should {
+    "throw when made with the wrong name" in new ActorSys {
+      //use a generated name
+      val a = system.actorOf(Props[MyActor])
+    } must produce [Exception]
+  }
+  "contruct without exception" in new ActorSys {
+    val a = makeActor()
+    // The throw will cause the test to fail
+  }
+  "respond with a Pong to a Ping" in new ActorSys {
+    val a = makeActor()
+    a ! Ping
+    expectMsg(Pong)
+  }
+}
