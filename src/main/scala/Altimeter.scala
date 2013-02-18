@@ -12,7 +12,9 @@ object Altimeter{
   def apply() = new Altimeter with ProductionEventSource
 }
 
-class Altimeter extends Actor with ActorLogging{ this: EventSource =>
+//the book uses the commented out section, but that results in a compliation error
+class Altimeter extends Actor with ActorLogging with ProductionEventSource{ // this: EventSource =>
+//class Altimeter extends Actor with ActorLogging { this: EventSource =>
   import Altimeter._
 
   val ceiling = 43000       //feet
@@ -26,7 +28,7 @@ class Altimeter extends Actor with ActorLogging{ this: EventSource =>
   case object Tick
 
   def altimeterReceive: Receive = {
-    case RateChange(amount) => //bound by [-1,]
+    case RateChange(amount) => //bound by [-1,+1]
       rateOfClimb = amount.min(1.0f).max(-1.0f) * maxRateOfClimb
       log.info(s"Altimeter changed rate of climb to $rateOfClimb")
     case Tick =>
