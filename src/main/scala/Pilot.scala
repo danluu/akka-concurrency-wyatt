@@ -45,3 +45,9 @@ class CoPilot extends Actor {
       autopilot = context.actorFor("../AutoPilot")
   }
 }
+
+trait PilotProvider{ 
+  def pilot: Actor = new Pilot
+  def copilot: Actor = new CoPilot
+//  def autopilot: Actor = new AutoPilot
+}
