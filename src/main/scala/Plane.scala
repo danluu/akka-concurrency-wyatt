@@ -10,7 +10,7 @@ class Plane extends Actor with ActorLogging{
   import Plane._
   import EventSource._
 
-  val altimeter = context.actorOf(Props[Altimeter])
+  val altimeter = context.actorOf(Props(Altimeter()), "Altimeter")
   val controls  = context.actorOf(Props(new ControlSurfaces(altimeter)))
 
   override def preStart() {
