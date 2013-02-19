@@ -15,7 +15,8 @@ trait EventSource{
   def eventSourceReceive: Actor.Receive
 }
 
-trait ProductionEventSource { this: Actor =>
+trait ProductionEventSource extends EventSource { this: Actor =>
+
   import EventSource._
 
   var listeners = scala.collection.immutable.Vector.empty[ActorRef]

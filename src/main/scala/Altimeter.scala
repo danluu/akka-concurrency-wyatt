@@ -13,8 +13,10 @@ object Altimeter{
 }
 
 //the book uses the commented out section, but that results in a compliation error
-class Altimeter extends Actor with ActorLogging with ProductionEventSource{ // this: EventSource =>
-//class Altimeter extends Actor with ActorLogging { this: EventSource =>
+//class Altimeter extends Actor with ActorLogging with ProductionEventSource{ // this: EventSource =>
+
+class Altimeter extends Actor with ActorLogging { this: EventSource =>
+
   import Altimeter._
 
   val ceiling = 43000       //feet
