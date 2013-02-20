@@ -7,11 +7,12 @@ object Pilots{
   case object RelinquishControl
 }
 
-class Pilot extends Actor{ 
+class Pilot (plane: ActorRef,
+  var controls: ActorRef,
+  altimeter: ActorRef) extends Actor{
   import Pilots._
   import Plane._
 
-  var controls: ActorRef = context.system.deadLetters
   var copilot: ActorRef = context.system.deadLetters
   var autopilot: ActorRef = context.system.deadLetters
   val copilotName = context.system.settings.config.getString(
@@ -21,18 +22,14 @@ class Pilot extends Actor{
       context.parent ! Plane.GiveMeControl
       copilot = context.actorFor("../" + copilotName)
       autopilot = context.actorFor("../AutoPilot")
-
-    //code from book doesn't compile. Using Stig's solution for this
-/*
     case Controls(controlSurfaces) =>
       controls = controlSurfaces
- */
-    case RelinquishControl => 
-      controls = context.system.deadLetters
+
+
   }
 }
 
-class CoPilot extends Actor { 
+class CoPilot (plane: ActorRef, altimeter: ActorRef) extends Actor { 
   import Pilots._
   var controls: ActorRef = context.system.deadLetters
   var pilot: ActorRef = context.system.deadLetters
@@ -47,7 +44,7 @@ class CoPilot extends Actor {
 }
 
 trait PilotProvider{ 
-  def newPilot: Actor = new Pilot
-  def newCopilot: Actor = new CoPilot
+  def newPilot(plane: ActorRef, controls: ActorRef, altimeter: ActorRef): Actor = new Pilot(plane, controls, altimeter)
+  def newCoPilot(plane: ActorRef, altimeter: ActorRef): Actor = new CoPilot(plane, altimeter)
 //  def autopilot: Actor = new AutoPilot
 }

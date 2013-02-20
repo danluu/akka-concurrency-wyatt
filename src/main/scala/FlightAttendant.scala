@@ -25,3 +25,7 @@ class FlightAttendant extends Actor { this: AttendantResponsiveness =>
       context.system.scheduler.scheduleOnce(responseDuration, sender, Drink(drinkname))
   }				     
 }
+
+trait FlightAttendantProvider{
+  def newFlightAttendant: Actor = FlightAttendant()
+}

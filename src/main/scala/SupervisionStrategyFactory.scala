@@ -1,6 +1,11 @@
+package zzz.akka.avionics
+
+import akka.actor._
+import akka.actor.SupervisorStrategy._
+import concurrent.duration.Duration
 import akka.actor.{SupervisorStrategy, OneForOneStrategy, AllForOneStrategy}
 import akka.actor.SupervisorStrategy.Decider
-import concurrent.duration.Duration
+
 
 trait SupervisionStrategyFactory {
   def makeStrategy(maxNrRetries: Int, withinTimeRange: Duration)(decider: Decider): SupervisorStrategy
@@ -15,3 +20,4 @@ trait AllForOneStrategyFactory extends SupervisionStrategyFactory {
   def makeStrategy(maxNrRetries: Int, withinTimeRange: Duration)(decider: Decider): SupervisorStrategy =
   AllForOneStrategy(maxNrRetries, withinTimeRange)(decider)
 }
+
