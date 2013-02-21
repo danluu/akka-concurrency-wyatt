@@ -49,3 +49,5 @@ class Altimeter extends Actor with ActorLogging { this: EventSource =>
 trait AltimeterProvider{
   def newAltimeter: Actor = Altimeter()
 }
+
+//NOTE: I'm skipping the altimeter calculation refactoring for now.

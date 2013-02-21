@@ -31,6 +31,7 @@ class Pilot (plane: ActorRef,
 
 class CoPilot (plane: ActorRef, altimeter: ActorRef) extends Actor { 
   import Pilots._
+  import akka.actor.Terminated
   var controls: ActorRef = context.system.deadLetters
   var pilot: ActorRef = context.system.deadLetters
   var autopilot: ActorRef = context.system.deadLetters
@@ -39,7 +40,11 @@ class CoPilot (plane: ActorRef, altimeter: ActorRef) extends Actor {
   def receive = { 
     case ReadyToGo =>
       pilot = context.actorFor("../" + pilotName)
+      context.watch(pilot)
       autopilot = context.actorFor("../AutoPilot")
+    case Terminated(_) =>
+      // Pilot died
+      plane ! Plane.GiveMeControl
   }
 }
 
