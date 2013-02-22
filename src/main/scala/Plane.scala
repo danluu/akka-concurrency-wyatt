@@ -10,6 +10,7 @@ import scala.concurrent.duration._
 
 object Plane{
   case object GiveMeControl
+  case object LostControl //this is used without definition or explanation in the text
   case class Controls(controls: ActorRef)
 
   def apply() = new Plane with AltimeterProvider with PilotProvider with LeadFlightAttendantProvider
