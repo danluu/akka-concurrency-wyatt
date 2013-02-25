@@ -13,6 +13,8 @@ object FlyingBehaviour {
 
   case class CourseTarget(altitude: Double, heading: Float, byMillis: Long)
   case class CourseStatus(altitude: Double, heading: Float, headingSinceMS: Long, altitudeSinceMS: Long)
+  case class NewElevatorCalculator(f: Calculator)
+  case class NewBankCalculator(f: Calculator)
 
   type Calculator = (CourseTarget, CourseStatus) => Any
 
@@ -110,6 +112,10 @@ class FlyingBehaviour(plane: ActorRef, heading: ActorRef, altimeter: ActorRef) e
     case Event(HeadingUpdate(head), d: FlightData) =>
       stay using d.copy(status = d.status.copy(heading = head, headingSinceMS = currentMS))
     case Event(Adjust, flightData: FlightData) => stay using adjust(flightData)
+    case Event(NewBankCalculator(f), d: FlightData) =>
+      stay using d.copy(bankCalc = f)
+    case Event(NewElevatorCalculator(f), d: FlightData) =>
+      stay using d.copy(elevCalc = f)
   }
 
   onTransition{
