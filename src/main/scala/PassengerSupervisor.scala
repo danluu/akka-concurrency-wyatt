@@ -3,6 +3,7 @@ package zzz.akka.avionics
 import akka.actor.{ActorRef, Actor, Props, ActorKilledException, ActorInitializationException}
 import akka.actor.SupervisorStrategy._
 import akka.actor.{OneForOneStrategy}
+import akka.routing.BroadcastRouter
 
 object PassengerSupervisor {
   case object GetPassengerBroadcaster
