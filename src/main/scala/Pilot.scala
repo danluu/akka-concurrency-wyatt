@@ -146,7 +146,7 @@ class CoPilot (plane: ActorRef, altimeter: ActorRef) extends Actor {
     case ReadyToGo =>
       pilot = context.actorFor("../" + pilotName)
       context.watch(pilot)
-      autopilot = context.actorFor("../AutoPilot")
+//      autopilot = context.actorFor("../AutoPilot")
     case Terminated(_) =>
       // Pilot died
       plane ! Plane.GiveMeControl
