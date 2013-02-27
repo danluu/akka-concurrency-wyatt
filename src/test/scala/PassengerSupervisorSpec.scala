@@ -10,9 +10,9 @@ import org.scalatest.matchers.MustMatchers
 object PassengerSupervisorSpec {
   val config = ConfigFactory.parseString("""
       zzz.akka.avionics.passengers = [
-        [ "Kelly Franqui",
-        [ "Tyrone Dotts",
-        [ "Malinda Class",
+        [ "Kelly Franqui", "23", "A" ],
+        [ "Tyrone Dotts", "23", "B" ],
+        [ "Malinda Class", "23", "C" ],
         [ "Kenya Jolicoeur", "24", "A" ],
         [ "Christian Piche", "24", "B" ]
       ] 
