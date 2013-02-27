@@ -19,9 +19,8 @@ class Pilot (plane: ActorRef,
   "zzz.akka.avionics.flightcrew.copilotName")
   def receive = {
     case ReadyToGo =>
-      context.parent ! Plane.GiveMeControl
       copilot = context.actorFor("../" + copilotName)
-      autopilot = context.actorFor("../AutoPilot")
+//      autopilot = context.actorFor("../AutoPilot")
     case Controls(controlSurfaces) =>
       controls = controlSurfaces
 
@@ -39,7 +38,7 @@ class CoPilot (plane: ActorRef, altimeter: ActorRef) extends Actor {
   def receive = { 
     case ReadyToGo =>
       pilot = context.actorFor("../" + pilotName)
-      autopilot = context.actorFor("../AutoPilot")
+//      autopilot = context.actorFor("../AutoPilot")
   }
 }
 
