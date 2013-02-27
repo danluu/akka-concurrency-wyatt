@@ -13,11 +13,11 @@ object Plane{
   case object LostControl //this is used without definition or explanation in the text
   case class Controls(controls: ActorRef)
 
-  def apply() = new Plane with AltimeterProvider with PilotProvider with LeadFlightAttendantProvider
+  def apply() = new Plane with AltimeterProvider with PilotProvider with LeadFlightAttendantProvider with HeadingIndicatorProvider
 }
 
 class Plane extends Actor with ActorLogging{
-  this: AltimeterProvider with PilotProvider with LeadFlightAttendantProvider =>
+  this: AltimeterProvider with PilotProvider with LeadFlightAttendantProvider with HeadingIndicatorProvider =>
   import Altimeter._
   import Plane._
   import IsolatedLifeCycleSupervisor._
@@ -37,7 +37,7 @@ class Plane extends Actor with ActorLogging{
     val controls = context.actorOf(Props(new IsolatedResumeSupervisor with OneForOneStrategyFactory {
       def childStarter() {
         val alt = context.actorOf(Props(newAltimeter), "Altimeter")
-        val head = context.actorOf(Props[HeadingIndicator], "HeadingIndicator")
+        val head = context.actorOf(Props(newHeadingIndicator), "HeadingIndicator")
 //          context.actorOf(Props(newAutopilot), "AutoPilot")
           context.actorOf(Props(new ControlSurfaces(self, alt, head)), "ControlSurfaces")
         }

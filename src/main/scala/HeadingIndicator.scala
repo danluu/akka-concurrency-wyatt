@@ -6,6 +6,7 @@ import akka.actor.{Actor, ActorLogging}
 object HeadingIndicator{
   case class BankChange(amount: Float)
   case class HeadingUpdate(heading: Float)
+  def apply() = new HeadingIndicator with ProductionEventSource
 }
 
 trait HeadingIndicator extends Actor with ActorLogging{ this: EventSource =>
@@ -33,4 +34,8 @@ trait HeadingIndicator extends Actor with ActorLogging{ this: EventSource =>
 
   def receive = eventSourceReceive orElse headingIndicatorReceive
   override def postStop(): Unit = ticker.cancel
+}
+
+trait HeadingIndicatorProvider{
+  def newHeadingIndicator: Actor = HeadingIndicator()
 }
