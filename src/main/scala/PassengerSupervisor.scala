@@ -1,9 +1,14 @@
 package zzz.akka.avionics
 
-import akka.actor.{ActorRef, Actor, Props, ActorKilledException, ActorInitializationException}
+import akka.actor.{ActorRef, Actor, Props, ActorKilledException, ActorInitializationException, ActorLogging}
+import akka.pattern.{ask, pipe}
+import akka.util.Timeout
+import scala.concurrent.duration._
 import akka.actor.SupervisorStrategy._
 import akka.actor.{OneForOneStrategy}
 import akka.routing.BroadcastRouter
+
+import scala.concurrent.ExecutionContext.Implicits.global
 
 object PassengerSupervisor {
   case object GetPassengerBroadcaster
@@ -11,7 +16,7 @@ object PassengerSupervisor {
   def apply(callButton: ActorRef) = new PassengerSupervisor(callButton) with PassengerProvider
 }
 
-class PassengerSupervisor(callButton: ActorRef) extends Actor { this: PassengerProvider =>
+class PassengerSupervisor(callButton: ActorRef) extends Actor with ActorLogging { this: PassengerProvider =>
   import PassengerSupervisor._
   override val supervisorStrategy = OneForOneStrategy() {
     case _: ActorKilledException => Escalate
@@ -43,19 +48,26 @@ class PassengerSupervisor(callButton: ActorRef) extends Actor { this: PassengerP
         }
       }
       def receive = {
-        case GetChildren(forSomeone: ActorRef) =>
-          sender ! Children(context.children, forSomeone)
+        case GetChildren =>
+          log.info(s"${self.path.name} received GetChildren from ${sender.path.name}")
+          sender ! context.children.toSeq
       }
     }), "PassengersSupervisor")
   }
 
+  implicit val timeout = Timeout(4.seconds)
   def noRouter: Receive = {
     case GetPassengerBroadcaster =>
-      val passengers = context.actorFor("PassengersSupervisor")
-      passengers ! GetChildren(sender)
-    case Children(passengers, destinedFor) =>
-      val router = context.actorOf(Props().withRouter(
-        BroadcastRouter(passengers.toSeq)), "Passengers")
+      log.info("PassengerSupervisor received GetPassengerBroadcaster")
+      val destinedFor = sender
+      val actor = context.actorFor("PassengersSupervisor")
+      (actor ? GetChildren).mapTo[Seq[ActorRef]].map {
+        passengers => (Props().withRouter(BroadcastRouter(passengers)),
+          destinedFor)
+      } pipeTo self
+    case (props: Props, destinedFor: ActorRef) =>
+      log.info(s"PassengerSupervisor received (${props.toString()},${destinedFor.toString()}) (transforming to withRouter)")
+      val router = context.actorOf(props, "Passengers")
       destinedFor ! PassengerBroadcaster(router)
       context.become(withRouter(router))
   }

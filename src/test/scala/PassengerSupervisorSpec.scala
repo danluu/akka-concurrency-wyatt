@@ -55,6 +55,7 @@ class PassengerSupervisorSpec extends TestKit(ActorSystem("PassengerSupervisorSp
       // Ensure that the cache works
       a ! GetPassengerBroadcaster
       expectMsg(PassengerBroadcaster(`broadcaster`))
+
     }
   }
 }
