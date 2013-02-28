@@ -4,6 +4,7 @@ import akka.actor.{Actor, ActorRef, Props, ActorLogging}
 import akka.actor.SupervisorStrategy._
 import akka.pattern.ask
 import akka.util.Timeout
+import akka.routing.FromConfig
 import scala.concurrent.Await
 import scala.concurrent.duration._
 
@@ -50,15 +51,17 @@ class Plane extends Actor with ActorLogging{
     val controls = actorForControls("ControlSurfaces")
 //    val autopilot = actorForControls("AutoPilot")
     val altimeter = actorForControls("Altimeter")
+    val leadAttendant = context.actorOf(Props(newFlightAttendant).withRouter(FromConfig()),"LeadFlightAttendant")
     val people = context.actorOf(Props(new IsolatedStopSupervisor with OneForOneStrategyFactory {
       def childStarter() {
+          context.actorOf(Props(PassengerSupervisor(leadAttendant)), "Passengers")
           context.actorOf(Props(newCoPilot(plane, altimeter)), copilotName)
           context.actorOf(Props(newPilot(plane, controls, altimeter)), pilotName)
         }
     }), "Pilots")
     // Use the default strategy here, which
     // restarts indefinitely
-    context.actorOf(Props(newFlightAttendant), attendantName)
+//    context.actorOf(Props(newFlightAttendant), attendantName)
     Await.result(people ? WaitForStart, 1.second)
   }
 
