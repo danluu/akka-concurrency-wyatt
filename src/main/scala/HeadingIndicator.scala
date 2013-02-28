@@ -9,9 +9,12 @@ object HeadingIndicator{
   def apply() = new HeadingIndicator with ProductionEventSource
 }
 
-trait HeadingIndicator extends Actor with ActorLogging{ this: EventSource =>
+trait HeadingIndicator extends Actor with ActorLogging with StatusReporter { this: EventSource =>
+  import StatusReporter._
   import HeadingIndicator._
   import context._
+
+  def currentStatus = StatusOK
 
   case object Tick //internal message
 
@@ -32,7 +35,7 @@ trait HeadingIndicator extends Actor with ActorLogging{ this: EventSource =>
       sendEvent(HeadingUpdate(heading))
   }
 
-  def receive = eventSourceReceive orElse headingIndicatorReceive
+  def receive = statusReceive orElse  eventSourceReceive orElse headingIndicatorReceive
   override def postStop(): Unit = ticker.cancel
 }
 
