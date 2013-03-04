@@ -14,6 +14,7 @@ trait HeadingIndicator extends Actor with ActorLogging with StatusReporter { thi
   import StatusReporter._
   import HeadingIndicator._
   import context._
+  import Plane.GetCurrentHeading
 
   def currentStatus = StatusOK
 
@@ -34,6 +35,8 @@ trait HeadingIndicator extends Actor with ActorLogging with StatusReporter { thi
       heading = (heading + (360 + (timeDelta * degs))) % 360
       lastTick = tick
       sendEvent(HeadingUpdate(heading))
+    case GetCurrentHeading =>
+      sender ! CurrentHeading(heading)
   }
 
   def receive = statusReceive orElse  eventSourceReceive orElse headingIndicatorReceive

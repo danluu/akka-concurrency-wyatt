@@ -90,7 +90,7 @@ class Plane extends Actor with ActorLogging{
     case AltitudeUpdate(altitude) =>
 //      log.info("Altitude is now: " + altitude)
     case GetCurrentHeading =>
-      log.info("Heading request")
+      actorForControls("HeadingIndicator") forward GetCurrentHeading
     case GetCurrentAltitude =>
       actorForControls("Altimeter") forward GetCurrentAltitude
   }
