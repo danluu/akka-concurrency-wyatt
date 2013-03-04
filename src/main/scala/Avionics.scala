@@ -21,7 +21,7 @@ object Avionics {
     system.scheduler.scheduleOnce(1.seconds) {control ! ControlSurfaces.StickBack(0f)}
     system.scheduler.scheduleOnce(3.seconds) {control ! ControlSurfaces.StickBack(.5f)}
     system.scheduler.scheduleOnce(4.seconds) {control ! ControlSurfaces.StickBack(0f)}
-    system.scheduler.scheduleOnce(25.seconds) {system.shutdown()}
+    system.scheduler.scheduleOnce(5.seconds) {system.shutdown()}
   }
 
 
