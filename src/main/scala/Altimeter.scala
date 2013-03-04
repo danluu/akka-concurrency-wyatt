@@ -9,6 +9,7 @@ import  scala.concurrent.ExecutionContext.Implicits.global
 object Altimeter{
   case class RateChange(amount: Float) //sent to Altimeter
   case class AltitudeUpdate(altitude: Double)
+  case class CurrentAltitude(altitude: Double)
   def apply() = new Altimeter with ProductionEventSource
 }
 

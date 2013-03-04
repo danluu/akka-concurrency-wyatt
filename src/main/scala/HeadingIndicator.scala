@@ -6,6 +6,7 @@ import akka.actor.{Actor, ActorLogging}
 object HeadingIndicator{
   case class BankChange(amount: Float)
   case class HeadingUpdate(heading: Float)
+  case class CurrentHeading(heading: Float)
   def apply() = new HeadingIndicator with ProductionEventSource
 }
 

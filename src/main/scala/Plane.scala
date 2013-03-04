@@ -12,6 +12,8 @@ import scala.concurrent.duration._
 object Plane{
   case object GiveMeControl
   case object LostControl //this is used without definition or explanation in the text
+  case object GetCurrentHeading
+  case object GetCurrentAltitude
   case class Controls(controls: ActorRef)
 
   def apply() = new Plane with AltimeterProvider with PilotProvider with LeadFlightAttendantProvider with HeadingIndicatorProvider
@@ -83,6 +85,10 @@ class Plane extends Actor with ActorLogging{
       sender ! actorForControls("ControlSurfaces")
     case AltitudeUpdate(altitude) =>
       log.info("Altitude is now: " + altitude)
+    case GetCurrentHeading =>
+      log.info("Heading request")
+    case GetCurrentAltitude =>
+      log.info("Alt request")
   }
 
 }

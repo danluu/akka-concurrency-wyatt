@@ -12,6 +12,7 @@ object Avionics {
   implicit val timeout =  Timeout(5.seconds)
   val system  =  ActorSystem("PlaneSimulation")
   val plane  =  system.actorOf(Props(Plane()),"Plane")
+  val server = system.actorOf(Props(new TelnetServer(plane)),"Telnet")
 
   def main(args: Array[String]){
     val control = Await.result((plane ? Plane.GiveMeControl).mapTo[ActorRef], 5.seconds)
