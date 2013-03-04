@@ -92,16 +92,7 @@ class Plane extends Actor with ActorLogging{
     case GetCurrentHeading =>
       log.info("Heading request")
     case GetCurrentAltitude =>
-      val destinedFor = sender
-      (actorForControls("Altimeter") ? GetCurrentAltitude).mapTo[CurrentAltitude].onComplete {
-        case Success(CurrentAltitude(altitude)) => 
-          log.info(s"Sending CurrentAltitude(${altitude}) to ${destinedFor}")
-          destinedFor ! CurrentAltitude(altitude)
-        case Success(m) => log.info(s"Bogus message returned from altimeter: ${m}")
-        case Failure(m) => log.info(s"Failed altitude request: ${m}")
-      }
-
-      
+      actorForControls("Altimeter") forward GetCurrentAltitude
   }
 
 }
