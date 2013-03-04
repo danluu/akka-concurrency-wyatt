@@ -7,13 +7,16 @@ import akka.util.Timeout
 import akka.routing.FromConfig
 import scala.concurrent.Await
 import scala.concurrent.duration._
+import scala.util.{Success, Failure}
 
+import  scala.concurrent.ExecutionContext.Implicits.global
 
 object Plane{
   case object GiveMeControl
   case object LostControl //this is used without definition or explanation in the text
   case object GetCurrentHeading
   case object GetCurrentAltitude
+
   case class Controls(controls: ActorRef)
 
   def apply() = new Plane with AltimeterProvider with PilotProvider with LeadFlightAttendantProvider with HeadingIndicatorProvider
@@ -24,6 +27,7 @@ class Plane extends Actor with ActorLogging{
   import Altimeter._
   import Plane._
   import IsolatedLifeCycleSupervisor._
+  import Altimeter.CurrentAltitude
 
   val cfgstr = "zzz.akka.avionics.flightcrew"
   val config = context.system.settings.config
@@ -84,11 +88,20 @@ class Plane extends Actor with ActorLogging{
       log.info(s"Plane giving control to ${sender.path.name}, ${sender.toString}")
       sender ! actorForControls("ControlSurfaces")
     case AltitudeUpdate(altitude) =>
-      log.info("Altitude is now: " + altitude)
+//      log.info("Altitude is now: " + altitude)
     case GetCurrentHeading =>
       log.info("Heading request")
     case GetCurrentAltitude =>
-      log.info("Alt request")
+      val destinedFor = sender
+      (actorForControls("Altimeter") ? GetCurrentAltitude).mapTo[CurrentAltitude].onComplete {
+        case Success(CurrentAltitude(altitude)) => 
+          log.info(s"Sending CurrentAltitude(${altitude}) to ${destinedFor}")
+          destinedFor ! CurrentAltitude(altitude)
+        case Success(m) => log.info(s"Bogus message returned from altimeter: ${m}")
+        case Failure(m) => log.info(s"Failed altitude request: ${m}")
+      }
+
+      
   }
 
 }

@@ -19,6 +19,7 @@ object Altimeter{
 class Altimeter extends Actor with ActorLogging { this: EventSource =>
 
   import Altimeter._
+  import Plane.GetCurrentAltitude
 
   val ceiling = 43000       //feet
   val maxRateOfClimb = 5000 //feet per minute
@@ -39,6 +40,9 @@ class Altimeter extends Actor with ActorLogging { this: EventSource =>
       altitude = altitude + rateOfClimb * ((tick - lastTick) / 60000.0)
       lastTick = tick
       sendEvent(AltitudeUpdate(altitude))
+    case GetCurrentAltitude =>
+      log.info("Altimeter - altitude request")
+      sender ! CurrentAltitude(altitude)
   }
 
   def receive = eventSourceReceive orElse altimeterReceive

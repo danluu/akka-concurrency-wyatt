@@ -34,6 +34,7 @@ class TelnetServer(plane: ActorRef) extends Actor with ActorLogging {
 
 object TelnetServer {
   import Plane.{GetCurrentHeading, GetCurrentAltitude}
+  import Altimeter.CurrentAltitude
 
     implicit val askTimeout = Timeout(1.second)
     val welcome =
@@ -70,8 +71,8 @@ object TelnetServer {
     (plane ? GetCurrentAltitude).mapTo[CurrentAltitude].onComplete {
       case Success(CurrentAltitude(altitude)) =>
         socket.write(altStr(altitude))
-      case Failure(_) =>
-        socket.write(unknown("altitude"))
+      case Failure(m) =>
+        socket.write(unknown(s"altitude error: ${m}"))
     }
   }
     def receive = {
