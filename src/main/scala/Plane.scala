@@ -2,9 +2,12 @@ package zzz.akka.avionics
 
 import akka.actor.{Actor, ActorRef, Props, ActorLogging}
 import akka.actor.SupervisorStrategy._
+import akka.actor.{OneForOneStrategy}
+import akka.agent.Agent
 import akka.pattern.ask
 import akka.util.Timeout
 import akka.routing.FromConfig
+import akka.routing.RoundRobinRouter
 import scala.concurrent.Await
 import scala.concurrent.duration._
 import scala.util.{Success, Failure}
@@ -35,10 +38,21 @@ class Plane extends Actor with ActorLogging{
   val copilotName = config.getString(s"$cfgstr.copilotName")
   val attendantName = config.getString(s"$cfgstr.leadAttendantName")
 
+  val maleBathroomCounter = Agent(GenderAndTime(Male, 0.seconds, 0))(context.system)
+  val femaleBathroomCounter = Agent(GenderAndTime(Male, 0.seconds, 0))(context.system)
+
   implicit val askTimeout = Timeout(1.second)
 
   def actorForControls(name: String) = context.actorFor("Equipment/" + name)
   def actorForPilots(name: String) = context.actorFor("Pilots/" + name)
+
+  def startUtilities() {
+    context.actorOf(Props(new Bathroom(femaleBathroomCounter, maleBathroomCounter)).withRouter(
+      RoundRobinRouter(nrOfInstances = 4,
+        supervisorStrategy = OneForOneStrategy() {
+          case _ => Resume
+        })), "Bathrooms")
+  }
 
   def startEquipment() {
     val controls = context.actorOf(Props(new IsolatedResumeSupervisor with OneForOneStrategyFactory {
@@ -57,6 +71,7 @@ class Plane extends Actor with ActorLogging{
     val controls = actorForControls("ControlSurfaces")
 //    val autopilot = actorForControls("AutoPilot")
     val altimeter = actorForControls("Altimeter")
+    val bathrooms = actorForControls("Bathrooms")
     val leadAttendant = context.actorOf(Props(newFlightAttendant).withRouter(FromConfig()),"LeadFlightAttendant")
     val people = context.actorOf(Props(new IsolatedStopSupervisor with OneForOneStrategyFactory {
       def childStarter() {
