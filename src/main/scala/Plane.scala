@@ -75,7 +75,7 @@ class Plane extends Actor with ActorLogging{
     val leadAttendant = context.actorOf(Props(newFlightAttendant).withRouter(FromConfig()),"LeadFlightAttendant")
     val people = context.actorOf(Props(new IsolatedStopSupervisor with OneForOneStrategyFactory {
       def childStarter() {
-          context.actorOf(Props(PassengerSupervisor(leadAttendant)), "Passengers")
+          context.actorOf(Props(PassengerSupervisor(leadAttendant, bathrooms)), "Passengers")
           context.actorOf(Props(newCoPilot(plane, altimeter)), copilotName)
           context.actorOf(Props(newPilot(plane, controls, altimeter)), pilotName)
         }
@@ -91,11 +91,24 @@ class Plane extends Actor with ActorLogging{
     import Pilots.ReadyToGo
 
     startEquipment()
+    startUtilities()
     startPeople()
 
     actorForControls("Altimeter") ! RegisterListener(self)
     actorForPilots(pilotName) ! ReadyToGo
     actorForPilots(copilotName) ! ReadyToGo
+  }
+
+  override def postStop(){
+    val male = maleBathroomCounter.await
+    val female = femaleBathroomCounter.await
+
+    maleBathroomCounter.close()
+    femaleBathroomCounter.close()
+    log.info(s"${male.count} men used the bathroom")
+    log.info(s"${female.count} women used the bathroom")
+    log.info(s"peak bathroom usage time for men {male.peakDuration}")
+    log.info(s"peak bathroom usage time for women {female.peakDuration}")
   }
 
   def receive = {

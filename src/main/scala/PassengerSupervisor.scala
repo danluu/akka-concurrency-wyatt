@@ -13,10 +13,10 @@ import scala.concurrent.ExecutionContext.Implicits.global
 object PassengerSupervisor {
   case object GetPassengerBroadcaster
   case class PassengerBroadcaster(broadcaster: ActorRef)
-  def apply(callButton: ActorRef) = new PassengerSupervisor(callButton) with PassengerProvider
+  def apply(callButton: ActorRef, bathrooms: ActorRef) = new PassengerSupervisor(callButton, bathrooms: ActorRef) with PassengerProvider
 }
 
-class PassengerSupervisor(callButton: ActorRef) extends Actor with ActorLogging { this: PassengerProvider =>
+class PassengerSupervisor(callButton: ActorRef, bathrooms: ActorRef) extends Actor with ActorLogging { this: PassengerProvider =>
   import PassengerSupervisor._
   override val supervisorStrategy = OneForOneStrategy() {
     case _: ActorKilledException => Escalate
