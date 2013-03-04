@@ -27,3 +27,5 @@ object Avionics {
 
 
 }
+
+//NOTE: skipping multiJVM testing, for now
