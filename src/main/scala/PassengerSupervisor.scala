@@ -44,7 +44,7 @@ class PassengerSupervisor(callButton: ActorRef, bathrooms: ActorRef) extends Act
           val id = nameWithSeat.asInstanceOf[ConfigList]
             .unwrapped().asScala.mkString("-")
             .replaceAllLiterally(" ", "_")
-          context.actorOf(Props(newPassenger(callButton)), id)
+          context.actorOf(Props(newPassenger(callButton, bathrooms)), id)
         }
       }
       def receive = {

@@ -71,7 +71,7 @@ class Plane extends Actor with ActorLogging{
     val controls = actorForControls("ControlSurfaces")
 //    val autopilot = actorForControls("AutoPilot")
     val altimeter = actorForControls("Altimeter")
-    val bathrooms = actorForControls("Bathrooms")
+    val bathrooms = context.actorFor("Bathrooms")
     val leadAttendant = context.actorOf(Props(newFlightAttendant).withRouter(FromConfig()),"LeadFlightAttendant")
     val people = context.actorOf(Props(new IsolatedStopSupervisor with OneForOneStrategyFactory {
       def childStarter() {

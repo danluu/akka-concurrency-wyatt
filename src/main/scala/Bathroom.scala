@@ -45,6 +45,7 @@ class Bathroom(femaleCounter: Agent[GenderAndTime], maleCounter: Agent[GenderAnd
   startWith(Vacant, NotInUse)
   when(Vacant) {
     case Event(IWannaUseTheBathroom, _) =>
+      log.info(s"Bathroom request from ${sender} granted (bathroom was empty)")
       sender ! YouCanUseTheBathroomNow
       goto(Occupied) using InUse(by = sender,
         atTimeMillis = System.currentTimeMillis,
@@ -52,6 +53,7 @@ class Bathroom(femaleCounter: Agent[GenderAndTime], maleCounter: Agent[GenderAnd
   }
   when(Occupied) {
     case Event(IWannaUseTheBathroom, data: InUse) =>
+      log.info(s"${sender} added to bathroom queue")
       stay using data.copy(queue = data.queue.enqueue(sender))
     case Event(Finished(gender), data: InUse) if sender == data.by =>
       updateCounter(maleCounter, femaleCounter, gender,

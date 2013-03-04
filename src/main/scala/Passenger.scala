@@ -21,17 +21,20 @@ trait DrinkRequestProbability {
 }
 
 trait PassengerProvider {
-  def newPassenger(callButton: ActorRef): Actor =
-    new Passenger(callButton) with DrinkRequestProbability
+  def newPassenger(callButton: ActorRef, bathrooms: ActorRef): Actor =
+    new Passenger(callButton, bathrooms) with DrinkRequestProbability
 }
 
-class Passenger(callButton: ActorRef) extends Actor with ActorLogging { this: DrinkRequestProbability =>
+class Passenger(callButton: ActorRef, bathrooms: ActorRef) extends Actor with ActorLogging { this: DrinkRequestProbability =>
 
   import Passenger._
   import FlightAttendant.{ GetDrink, Drink }
   import scala.collection.JavaConverters._
   val r = scala.util.Random
   case object CallForDrink
+  case object CallForBathroom
+  case object FinishWithBathroom
+  import Bathroom.{IWannaUseTheBathroom, YouCanUseTheBathroomNow}
   // The name of the Passenger can't have spaces in it,
   // since that's not a valid character in the URI spec.  We
   // know the name will have underscores in place of spaces,
@@ -42,6 +45,7 @@ class Passenger(callButton: ActorRef) extends Actor with ActorLogging { this: Dr
 
   override def preStart() {
     self ! CallForDrink
+    self ! CallForBathroom
   }
 
   def maybeSendDrinkRequest(): Unit = {
@@ -52,6 +56,18 @@ class Passenger(callButton: ActorRef) extends Actor with ActorLogging { this: Dr
     scheduler.scheduleOnce(randomishTime(), self, CallForDrink)
   }
 
+  def UseBathroom(): Unit = {
+    scheduler.scheduleOnce(randomishTime(), self, FinishWithBathroom)
+  }
+
+  //using this stub, but we should base this off of the number of drinks + duration
+  //instead, everyone tries to use the bathroom when they get on, and never try again
+  def maybeSendBathroomRequest(): Unit = {
+    log.info(s"$myname wants to use the bathroom (${bathrooms})")
+    bathrooms ! IWannaUseTheBathroom
+  }
+
+
   def receive = {
     case CallForDrink =>
       maybeSendDrinkRequest()
@@ -61,6 +77,13 @@ class Passenger(callButton: ActorRef) extends Actor with ActorLogging { this: Dr
       log.info(s"$myname fastening seatbelt")
     case UnfastenSeatbelts =>
       log.info(s"$myname unfastening seatbelt")
+    case CallForBathroom =>
+      maybeSendBathroomRequest()
+    case YouCanUseTheBathroomNow =>
+      log.info(s"$myname is using the bathroom")
+      UseBathroom()
+    case FinishWithBathroom => 
+      sender ! Bathroom.Finished(Male) //fixing a random gender
   }
 
 }
