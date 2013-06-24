@@ -1,7 +1,7 @@
 package zzz.akka.avionics
 
 import akka.actor.{ ActorSystem, Actor, ActorRef, Props }
-import akka.testkit.{ TestKit, ImplicitSender }
+import akka.testkit.{TestProbe, TestKit, ImplicitSender}
 import scala.concurrent.duration._
 import com.typesafe.config.ConfigFactory
 import org.scalatest.{ WordSpec, BeforeAndAfterAll }
@@ -20,7 +20,7 @@ object PassengerSupervisorSpec {
 }
 
 trait TestPassengerProvider extends PassengerProvider {
-  override def newPassenger(callButton: ActorRef): Actor =
+  override def newPassenger(callButton: ActorRef, bathrooms:ActorRef): Actor =
     new Actor {
       def receive = {
         case m => callButton ! m
@@ -38,9 +38,11 @@ class PassengerSupervisorSpec extends TestKit(ActorSystem("PassengerSupervisorSp
     system.shutdown()
   }
 
+  def nilActor: ActorRef = TestProbe().ref
+
   "PassengerSupervisor" should {
     "work" in {
-      val a = system.actorOf(Props(new PassengerSupervisor(testActor) with TestPassengerProvider))
+      val a = system.actorOf(Props(new PassengerSupervisor(testActor, nilActor) with TestPassengerProvider))
       a ! GetPassengerBroadcaster
       val broadcaster = expectMsgType[PassengerBroadcaster].broadcaster
       broadcaster ! "Hithere"
