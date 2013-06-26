@@ -17,10 +17,12 @@ class PassengersSpec extends TestKit(ActorSystem()) with ImplicitSender with Wor
   import akka.testkit.TestProbe
   import Passenger._
 
+  def nilActor: ActorRef = TestProbe().ref
+
   var seatNumber = 9
   def newPassenger(): ActorRef = {
     seatNumber += 1
-    system.actorOf(Props(new Passenger(testActor) with TestDrinkRequestProbability),
+    system.actorOf(Props(new Passenger(testActor, nilActor) with TestDrinkRequestProbability),
       s"Pat_Metheny-$seatNumber-B")
   }
   "Passengers" should {
