@@ -31,9 +31,9 @@ object AkkaBookBuild extends Build {
     // default test target
     executeTests in Test <<=
       ((executeTests in Test), (executeTests in MultiJvm)) map {
-        case ((_, testResults), (_, multiJvmResults))  =>
-          val results = testResults ++ multiJvmResults
-          (Tests.overall(results.values), results)
+        case (tests, multiJvmTests) =>
+          val results = tests.events ++ multiJvmTests.events
+          Tests.processResults(results)
       } )
   lazy val avionics = Project(
     id = "avionics",
